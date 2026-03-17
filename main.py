@@ -4,6 +4,7 @@ from pydantic import BaseModel, HttpUrl
 import os, requests
 import uvicorn
 import threading
+from openai import OpenAI
 
 API_URL = "https://api.groq.com/openai/v1"
 MODEL_NAME = "openai/gpt-oss-20b"  # reemplaza por el modelo Groq
@@ -14,33 +15,38 @@ if not API_KEY:
 
 app = FastAPI()
 
-class ChatRequest(BaseModel):
-    messages: list[str]
-    image_url: HttpUrl | None = None
-    
+
 @app.get("/")
 def root():
     return {"status": 200}    
 
 @app.post("/chat")
-def chat(req: ChatRequest):
-    payload = {
-        "model": MODEL_NAME,
-        "input": {
-            "messages": req.messages
-        }
-    }
-    if req.image_url:
-        payload["input"]["image_url"] = str(req.image_url)
+async def chat_endpoint(prompt, image):
+    try:
+        # Construir mensajes: texto + imagen si existe
+        messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
 
-    headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
-    resp = requests.post(API_URL, json=payload, headers=headers, timeout=30)
-    if resp.status_code != 200:
-        raise HTTPException(status_code=502, detail=f"Upstream error: {resp.text}")
-    return resp.json()
+        if image != None
+        	upload_resp = openai.File.create(
+        file=image,
+        purpose="vision"  # Indica que el archivo se usará para visión
+    )
+    
+            messages[0]["content"].append({"type": "image_file", "image_file": {"file_id": upload_resp.id}})
+
+        response = client_ia.chat.completions.create(
+            model="openai/gpt-oss-20b",  # ajusta al modelo que Groq soporte
+            messages=messages
+        )
+
+        reply = response.choices[0].message.content
+        return {"reply": reply}
+
+    except Exception as e:
+        return {"error": str(e)}
     
 def keep_alive():
-    url = "https://srelemium-scraper-1.onrender.com"
+    url = "https://grok-gpt.onrender.com"
     if not url:
         log("No se encontró RENDEREXTERNALURL, keep_alive desactivado")
         return
