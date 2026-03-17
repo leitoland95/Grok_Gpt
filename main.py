@@ -27,7 +27,7 @@ async def chat_endpoint(prompt, image):
         messages = [{"role": "user", "content": [{"type": "text", "text": prompt}]}]
 
         if image != None:
-        	upload_resp = openai.File.create(
+            upload_resp = openai.File.create(
         file=image,
         purpose="vision"  # Indica que el archivo se usará para visión
     )
