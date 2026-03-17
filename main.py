@@ -6,7 +6,7 @@ import uvicorn
 import threading
 
 API_URL = "https://api.groq.com/v1/infer"
-MODEL_NAME = "your-multimodal-model"  # reemplaza por el modelo Groq
+MODEL_NAME = "openai/gpt-oss-20b"  # reemplaza por el modelo Groq
 API_KEY = os.getenv("GROQ_API_KEY")
 
 if not API_KEY:
