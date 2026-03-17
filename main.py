@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, HttpUrl
 import os, requests
 import uvicorn
+import threading
 
 API_URL = "https://api.groq.com/v1/infer"
 MODEL_NAME = "your-multimodal-model"  # reemplaza por el modelo Groq
