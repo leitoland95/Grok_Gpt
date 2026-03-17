@@ -5,7 +5,7 @@ import os, requests
 import uvicorn
 import threading
 
-API_URL = "https://api.groq.com/v1"
+API_URL = "https://api.groq.com/openai/v1"
 MODEL_NAME = "openai/gpt-oss-20b"  # reemplaza por el modelo Groq
 API_KEY = os.getenv("GROQ_API_KEY")
 
