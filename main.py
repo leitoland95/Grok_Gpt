@@ -37,3 +37,22 @@ async def chat_endpoint(body: ChatRequest):
 
     except Exception as e:
         return {"error": str(e)}
+        
+        
+def keep_alive():
+    url = "https://grok-gpt.onrender.com"
+    if not url:
+        log("No se encontró RENDEREXTERNALURL, keep_alive desactivado")
+        return
+    while True:
+        try:
+            requests.get(url, timeout=10)
+            log(f"Ping a {url} para mantener vivo el servicio")
+        except Exception as e:
+            log(f"Error en keep_alive: {e}")
+        time.sleep(60)
+
+threading.Thread(target=keep_alive, daemon=True).start()
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))            
