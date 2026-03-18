@@ -62,8 +62,11 @@ async def chat_endpoint(body: ChatRequest):
 
         if body.image_base64:
             messages[0]["content"].append({
-                "type": "image_base64",
-                "image_base64": {"data": body.image_base64}
+                "type": "document",
+                "document": {
+                    "data": body.image_base64,
+                    "mime_type": "image/jpeg"  # ajusta según formato
+                }
             })
 
         response = client_ia.chat.completions.create(
@@ -83,4 +86,4 @@ async def chat_endpoint(body: ChatRequest):
 threading.Thread(target=keep_alive, daemon=True).start()
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))            
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))         
