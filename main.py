@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
-import os
+import os, requests, threading
 from openai import OpenAI
 
 API_URL = "https://api.groq.com/openai/v1"
