@@ -11,7 +11,7 @@ from groq import Groq
 ###### VARIABLES #################
 
 
-MODEL_NAME = "openai/gpt-oss-20b"   # ajusta al modelo disponible en Groq
+MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"   # ajusta al modelo disponible en Groq
 
 client_ia = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
