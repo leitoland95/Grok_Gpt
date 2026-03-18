@@ -6,14 +6,14 @@ from typing import Optional
 import os, requests, threading
 from openai import OpenAI
 import uvicorn
+from groq import Groq
 
 ###### VARIABLES #################
 
-API_URL = "https://api.groq.com/openai/v1"
-MODEL_NAME = "openai/gpt-oss-20b"   # ajusta al modelo disponible en Groq
-API_KEY = os.getenv("GROQ_API_KEY")
 
-client_ia = OpenAI(api_key=API_KEY, base_url=API_URL)
+MODEL_NAME = "openai/gpt-oss-20b"   # ajusta al modelo disponible en Groq
+
+client_ia = Groq(apikey=os.environ.get("GROQ_API_KEY"))
 
 app = FastAPI()
 
@@ -58,28 +58,26 @@ def save_logs():
 @app.post("/chat")
 async def chat_endpoint(body: ChatRequest):
     try:
-        if body.image_base64:
-            # Multimodal: texto + documento
+        # Si no hay imagen  mensaje simple
+        if not body.image_base64:
+            messages = [{
+                "role": "user",
+                "content": body.prompt
+            }]
+        else:
+            # Construir data URL
+            data_url = f"data:image/jpeg;base64,{body.image_base64}"
+
+            # Mensaje multimodal correcto para Groq
             messages = [{
                 "role": "user",
                 "content": [
                     {"type": "text", "text": body.prompt},
                     {
-                        "type": "document",
-                        "document": {
-                            "data": {
-                                "content": body.image_base64
-                            },
-                            "mime_type": "image/jpeg"
-                        }
+                        "type": "image_url",
+                        "image_url": {"url": data_url}
                     }
                 ]
-            }]
-        else:
-            # Solo texto: content debe ser string
-            messages = [{
-                "role": "user",
-                "content": body.prompt
             }]
 
         response = client_ia.chat.completions.create(
