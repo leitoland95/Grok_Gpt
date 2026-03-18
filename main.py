@@ -58,18 +58,26 @@ def save_logs():
 @app.post("/chat")
 async def chat_endpoint(body: ChatRequest):
     try:
-        messages = [{"role": "user", "content": [{"type": "text", "text": body.prompt}]}]
-
-        if body.image_base64:
-            messages[0]["content"].append({
-                "type": "document",
-                "document": {
-                    "data": {
-                        "content": body.image_base64  # 👈 aquí va la cadena base64
-                    },
-                    "mime_type": "image/jpeg"        # ajusta según formato
-                }
-            })
+        # Si solo hay texto
+        if not body.image_base64:
+            messages = [{"role": "user", "content": body.prompt}]
+        else:
+            # Multimodal: texto + documento
+            messages = [{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": body.prompt},
+                    {
+                        "type": "document",
+                        "document": {
+                            "data": {
+                                "content": body.image_base64
+                            },
+                            "mime_type": "image/jpeg"
+                        }
+                    }
+                ]
+            }]
 
         response = client_ia.chat.completions.create(
             model=MODEL_NAME,
