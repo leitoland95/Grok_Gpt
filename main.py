@@ -55,20 +55,33 @@ def root():
 def save_logs():
     return exec_logs    
     
+from fastapi import FastAPI
+from pydantic import BaseModel
+import os
+
+app = FastAPI()
+
+MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
+
+# Variable global para persistencia
+conversation_id = None
+
+class ChatRequest(BaseModel):
+    prompt: str
+    image_base64: str | None = None
+
 @app.post("/chat")
 async def chat_endpoint(body: ChatRequest):
+    global conversation_id
     try:
-        # Si no hay imagen  mensaje simple
+        # Construcción de mensajes
         if not body.image_base64:
             messages = [{
                 "role": "user",
                 "content": body.prompt
             }]
         else:
-            # Construir data URL
             data_url = f"data:image/jpeg;base64,{body.image_base64}"
-
-            # Mensaje multimodal correcto para Groq
             messages = [{
                 "role": "user",
                 "content": [
@@ -80,13 +93,21 @@ async def chat_endpoint(body: ChatRequest):
                 ]
             }]
 
+        # Enviar petición con conversation_id si existe
         response = client_ia.chat.completions.create(
             model=MODEL_NAME,
-            messages=messages
+            messages=messages,
+            conversation_id=conversation_id if conversation_id else None
         )
 
+        # Actualizar conversation_id con el que devuelve la API
+        conversation_id = getattr(response, "conversation_id", conversation_id)
+
         reply = response.choices[0].message.content
-        return {"reply": reply}
+        return {
+            "reply": reply,
+            "conversation_id": conversation_id
+        }
 
     except Exception as e:
         return {"error": str(e)}
